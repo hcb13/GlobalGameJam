@@ -26,11 +26,12 @@ public class Player : MonoBehaviour
 
     private bool _hasEnterLadder = false;
     private Vector2 _vertical;
-    private bool _isClimbing = false;
+    private bool isClimbing = false;
 
     public Action<float> OnMove = delegate { };
     public Action<bool> OnGrounded = delegate { };
     public Action<float> OnVerticalVelocity = delegate { };
+    public Action<bool> OnClimbing = delegate { };
 
     private void Awake()
     {
@@ -73,11 +74,26 @@ public class Player : MonoBehaviour
         }        
     }
 
+    private void FixedUpdate()
+    {
+        if (isClimbing)
+        {
+            myRigidbody.gravityScale = 0f;
+            myRigidbody.velocity = new Vector2(myRigidbody.velocity.x,
+                                              _vertical.normalized.y * moveSpeed);
+        }
+        else
+        {
+            myRigidbody.gravityScale = 1;
+        }
+    }
+
     private void LateUpdate()
     {
         OnMove?.Invoke(inputVector.x);
         OnGrounded?.Invoke(isGrounded);
-        OnVerticalVelocity?.Invoke(myRigidbody.velocity.y); 
+        OnVerticalVelocity?.Invoke(myRigidbody.velocity.y);
+        OnClimbing?.Invoke(isClimbing);
     }
 
     private void OnTriggerEnter2D(Collider2D collision)
@@ -99,14 +115,12 @@ public class Player : MonoBehaviour
     private void EnterStair()
     {
         _hasEnterLadder = true;
-        Debug.Log("Enter stairs");
     }
 
     private void ExitStair()
     {
         _hasEnterLadder = false;
-        _isClimbing = false;
-        Debug.Log("Exit stairs");
+        isClimbing = false;
     }
 
     private void SetVertical(float vertical)
@@ -115,7 +129,7 @@ public class Player : MonoBehaviour
 
         if (_hasEnterLadder && Mathf.Abs(vertical) > 0f)
         {
-            _isClimbing = true;
+            isClimbing = true;
         }
     }
 

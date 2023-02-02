@@ -10,9 +10,11 @@ public class PlayerAnimator : MonoBehaviour
 
     private void Awake()
     {
-        GetComponent<Player>().OnMove += UpdateAnimatorIdle;
-        GetComponent<Player>().OnGrounded += UpdateAnimatorGrounded;
-        GetComponent<Player>().OnVerticalVelocity += UpdateAnimatorVerticalVelocity;
+        Player player = GetComponent<Player>();
+        player.OnMove += UpdateAnimatorIdle;
+        player.OnGrounded += UpdateAnimatorGrounded;
+        player.OnVerticalVelocity += UpdateAnimatorVerticalVelocity;
+        player.OnClimbing += UpdateAnimatorClimbing;
     }
 
     private void UpdateAnimatorIdle(float movement)
@@ -28,5 +30,10 @@ public class PlayerAnimator : MonoBehaviour
     private void UpdateAnimatorVerticalVelocity(float velocity)
     {
         animator.SetFloat("VerticalVelocity", velocity);
+    }
+
+    private void UpdateAnimatorClimbing(bool isClimbing)
+    {
+        animator.SetBool("IsClimbing", isClimbing);
     }
 }
