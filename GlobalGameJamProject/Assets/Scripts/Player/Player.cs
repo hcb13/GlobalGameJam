@@ -24,6 +24,10 @@ public class Player : MonoBehaviour
     private float groundCheckRadius;
     private bool isGrounded;
 
+    private bool _hasEnterLadder = false;
+    private Vector2 _vertical;
+    private bool _isClimbing = false;
+
     public Action<float> OnMove = delegate { };
     public Action<bool> OnGrounded = delegate { };
     public Action<float> OnVerticalVelocity = delegate { };
@@ -42,8 +46,10 @@ public class Player : MonoBehaviour
 
         jumping = Input.GetKeyDown(KeyCode.Space);
         isGrounded = Physics2D.OverlapCircle(groundCheck.position, groundCheckRadius, groundLayer);
-
         Jump();
+
+        inputVector.y = Input.GetAxisRaw("Vertical");
+        SetVertical(inputVector.y);
     }
 
     private void Move()
@@ -72,6 +78,45 @@ public class Player : MonoBehaviour
         OnMove?.Invoke(inputVector.x);
         OnGrounded?.Invoke(isGrounded);
         OnVerticalVelocity?.Invoke(myRigidbody.velocity.y); 
+    }
+
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+        if (collision.CompareTag("Stairs"))
+        {
+            EnterStair();
+        }
+    }
+
+    private void OnTriggerExit2D(Collider2D collision)
+    {
+        if (collision.CompareTag("Stairs"))
+        {
+            ExitStair();
+        }
+    }
+
+    private void EnterStair()
+    {
+        _hasEnterLadder = true;
+        Debug.Log("Enter stairs");
+    }
+
+    private void ExitStair()
+    {
+        _hasEnterLadder = false;
+        _isClimbing = false;
+        Debug.Log("Exit stairs");
+    }
+
+    private void SetVertical(float vertical)
+    {
+        _vertical = new Vector2(0f, vertical);
+
+        if (_hasEnterLadder && Mathf.Abs(vertical) > 0f)
+        {
+            _isClimbing = true;
+        }
     }
 
 }
