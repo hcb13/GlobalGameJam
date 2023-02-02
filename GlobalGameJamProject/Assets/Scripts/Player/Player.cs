@@ -8,8 +8,12 @@ public class Player : MonoBehaviour
     [SerializeField]
     private float moveSpeed = 2f;
 
+    [SerializeField]
+    private float jumpForce = 2.5f;
+
     private Rigidbody2D myRigidbody;
     private Vector2 inputVector;
+    private bool jumping;
 
     public Action<float> OnMove = delegate { };
 
@@ -23,16 +27,31 @@ public class Player : MonoBehaviour
         inputVector = Vector2.zero;
 
         inputVector.x = Input.GetAxisRaw("Horizontal");
-        inputVector = inputVector.normalized;
+        Move();
 
-        transform.right = inputVector;
+        jumping = Input.GetKeyDown(KeyCode.Space);
+        Jump();
+    }
 
+    private void Move()
+    {
+        if (inputVector.x != 0f)
+        {
+            inputVector = inputVector.normalized;
+
+            transform.right = inputVector;
+            
+        }
+        transform.position += (Vector3)inputVector * moveSpeed * Time.deltaTime;
         OnMove?.Invoke(inputVector.x);
     }
 
-    private void FixedUpdate()
+    private void Jump()
     {
-        myRigidbody.velocity = inputVector * moveSpeed * Time.deltaTime;
+        if (jumping)
+        {
+            myRigidbody.AddForce(Vector2.up * jumpForce, ForceMode2D.Impulse);
+        }
     }
-
+   
 }
