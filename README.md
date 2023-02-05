@@ -1,2 +1,2 @@
 # GlobalGameJam
- Jogo produzido para a Global Game Jam 2023
+Game developed to the Global Game Jam 2023
