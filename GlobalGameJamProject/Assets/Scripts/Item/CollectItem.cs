@@ -10,11 +10,14 @@ public class CollectItem : MonoBehaviour
 
     private Transform myCollider;
 
+    [SerializeField] private AudioSource audioCollected;
+
     private void OnTriggerEnter2D(Collider2D collision)
     {
         if (collision.CompareTag("Items"))
         {
             myCollider = collision.transform;
+            audioCollected.Play();
             ShowCollectAnimation();
         }
     }

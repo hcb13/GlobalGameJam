@@ -28,6 +28,14 @@ public class Player : MonoBehaviour
     private Vector2 _vertical;
     private bool isClimbing = false;
 
+    [SerializeField] private Transform spawnPoint;
+    [SerializeField] private float timeWaitRespawn = 3f;
+
+    [SerializeField] private AudioSource audioPlayerJump;
+
+    [SerializeField] private GameObject dialogPauseMenu;
+    [SerializeField] private bool isPaused = false;
+
     public Action<float> OnMove = delegate { };
     public Action<bool> OnGrounded = delegate { };
     public Action<float> OnVerticalVelocity = delegate { };
@@ -40,17 +48,39 @@ public class Player : MonoBehaviour
 
     private void Update()
     {
-        inputVector = Vector2.zero;
+        inputVector = Vector2.zero;        
 
-        inputVector.x = Input.GetAxisRaw("Horizontal");
-        Move();
+        if (!isPaused)
+        {
+            isPaused = Input.GetKey(KeyCode.Escape);
 
-        jumping = Input.GetKeyDown(KeyCode.Space);
-        isGrounded = Physics2D.OverlapCircle(groundCheck.position, groundCheckRadius, groundLayer);
-        Jump();
+            inputVector.x = Input.GetAxisRaw("Horizontal");
+            Move();
 
-        inputVector.y = Input.GetAxisRaw("Vertical");
-        SetVertical(inputVector.y);
+            jumping = Input.GetKeyDown(KeyCode.Space);
+            isGrounded = Physics2D.OverlapCircle(groundCheck.position, groundCheckRadius, groundLayer);
+            Jump();
+
+            inputVector.y = Input.GetAxisRaw("Vertical");
+            SetVertical(inputVector.y);
+        }
+        else
+        {
+            Pause();
+        }
+    }
+
+    private void Pause()
+    {
+        dialogPauseMenu.SetActive(true);
+        Time.timeScale = 0;
+    }
+
+    public void NotPause()
+    {
+        isPaused = false;
+        dialogPauseMenu.SetActive(false);
+        Time.timeScale = 1;
     }
 
     private void Move()
@@ -70,8 +100,23 @@ public class Player : MonoBehaviour
     {        
         if (jumping && isGrounded)
         {
+            audioPlayerJump.Play();
             myRigidbody.AddForce(Vector2.up * jumpForce, ForceMode2D.Impulse);
         }        
+    }
+
+    public void Respawn()
+    {
+        GameObject LifeHUD = GameObject.FindGameObjectWithTag("LifeHUD");
+        LifeHUD.GetComponent<LifeHUD>().UpdateAnimatorLifes(-1);
+        StartCoroutine(CoroutineRespawn());
+    }
+
+    private IEnumerator CoroutineRespawn()
+    {
+        yield return new WaitForSeconds(timeWaitRespawn);
+        transform.position = spawnPoint.position;
+        GetComponent<PlayerAnimator>().UpdateAnimatorHurt(false);
     }
 
     private void FixedUpdate()
@@ -125,7 +170,7 @@ public class Player : MonoBehaviour
 
     private void SetVertical(float vertical)
     {
-        _vertical = new Vector2(0f, vertical);
+        _vertical = new Vector2(0f, vertical / 2 * Time.deltaTime);
 
         if (_hasEnterLadder && Mathf.Abs(vertical) > 0f)
         {

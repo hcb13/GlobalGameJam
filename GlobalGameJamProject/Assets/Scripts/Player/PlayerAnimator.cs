@@ -36,4 +36,9 @@ public class PlayerAnimator : MonoBehaviour
     {
         animator.SetBool("IsClimbing", isClimbing);
     }
+
+    public void UpdateAnimatorHurt(bool isHurt)
+    {
+        animator.SetBool("IsHurt", isHurt);
+    }
 }

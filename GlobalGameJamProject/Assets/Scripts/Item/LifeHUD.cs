@@ -21,5 +21,10 @@ public class LifeHUD : MonoBehaviour
             aux += value;
             animator.SetInteger("Lifes", aux);
         }
+
+        if(value < 0 && aux == 0)
+        {
+            GameObject.FindGameObjectWithTag("GameController").GetComponent<GameController>().Lost();
+        }
     }
 }
